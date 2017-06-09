@@ -65,9 +65,43 @@ public class BodyPartSelector : MonoBehaviour
                         {
                             foreach (var doap in doaps)
                             {
-                                if ((tpap.position - doap.position).magnitude < 1)
+                                if (tpap.tag != "AttachPoint")
+                                    continue;
+
+                                if ((tpap.position - doap.position).magnitude < 0.5f)
                                 {
-                                    doap.parent = tpap.parent;
+                                    var obj1 = tpap.parent;
+                                    var obj2 = doap.parent;
+
+                                    var attach_to = obj1;
+                                    var attach_to_ap = tpap;
+                                    var attacher = obj2;
+                                    var attacher_ap = doap;
+
+                                    var attach_to_bpc = attach_to.GetComponent<BodypartController>();
+                                    var attacher_bpc = attacher.GetComponent<BodypartController>();
+
+                                    if ((attach_to_bpc && attacher_bpc && obj1.GetComponent<BodypartController>().IsLegArm && !obj2.GetComponent<BodypartController>().IsLegArm)
+                                        || (attach_to_bpc && !attacher_bpc))
+                                    {
+                                        attach_to = obj2;
+                                        attacher = obj1;
+                                        attach_to_ap = doap;
+                                        attacher_ap = tpap;
+                                    }
+
+                                    attach_to_bpc = attach_to.GetComponent<BodypartController>();
+                                    attacher_bpc = attacher.GetComponent<BodypartController>();
+
+                                    var hj = attach_to.gameObject.AddComponent<HingeJoint2D>();
+                                    hj.connectedBody = attacher.gameObject.GetComponent<Rigidbody2D>();
+                                    hj.anchor = attach_to_ap.localPosition;
+                                    attacher.position = attach_to_ap.position + (attacher_ap.localPosition);
+
+                                    if (attach_to_bpc)
+                                        Destroy(attach_to_bpc);
+
+                                    attacher.GetComponent<BodypartController>().ForceMultiplier = 2.0f;
                                     Done();
                                     return;
                                 }

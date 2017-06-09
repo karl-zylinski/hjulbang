@@ -20,7 +20,8 @@ public class PlantCollider : MonoBehaviour
             return;
 
         var bps = Resources.Load("BodyPartSelector") as GameObject;
-        Instantiate(bps);
-        bps.GetComponent<BodyPartSelector>().InititateSelection(other.gameObject);
+        var go = Instantiate(bps);
+        go.GetComponent<BodyPartSelector>().InititateSelection(other.gameObject);
+        Destroy(this);
     }
 }

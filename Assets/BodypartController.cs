@@ -5,7 +5,8 @@ using UnityEngine;
 public class BodypartController : MonoBehaviour
 {
     public GameObject[] PivotPoints;
-    public bool AlwaysRotate = true;
+    public bool IsLegArm = false;
+    public float ForceMultiplier = 1.0f;
     private GameObject _current_pivot;
     private SpriteRenderer _renderer;
     private Rigidbody2D _rb;
@@ -41,10 +42,7 @@ public class BodypartController : MonoBehaviour
                     best = p;
             }
         }
-
-        if (!AlwaysRotate && Mathf.Abs(_current_pivot.transform.position.y - best.transform.position.y) > 0.5f)
-            return null;
-
+        
         return best;
     }
 
@@ -82,11 +80,11 @@ public class BodypartController : MonoBehaviour
         if (_force_timeout < 4)
             transform.Rotate(0, 0, Time.deltaTime);
 
-        const float TIMEOUT_FORCE = 2.0f;
+        const float TIMEOUT_FORCE = 1.0f;
         _force_timeout = Random.Range(TIMEOUT_FORCE*0.8f, TIMEOUT_FORCE*1.2f);
 
         var force_dir_obj = pivot.transform.GetChild(0);
-        var force_dir = (force_dir_obj.transform.position - pivot.transform.position).normalized * 2.6f;
+        var force_dir = (force_dir_obj.transform.position - pivot.transform.position).normalized * 2.6f * ForceMultiplier;
         _rb.AddForceAtPosition(force_dir, pivot.transform.position, ForceMode2D.Impulse);
         //var current_pivot = GetCurrentPivot();
         //_renderer.sprite = Sprite.Create(_renderer.sprite.texture, _renderer.sprite.rect, current_pivot);

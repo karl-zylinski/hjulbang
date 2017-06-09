@@ -68,7 +68,7 @@ GameObject:
   - component: {fileID: 212238168333352878}
   - component: {fileID: 50632020200281680}
   - component: {fileID: 60769291873677022}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Bodypart
   m_TagString: Bodypart
   m_Icon: {fileID: 0}
@@ -250,7 +250,7 @@ MonoBehaviour:
   PivotPoints:
   - {fileID: 1503852790946266}
   - {fileID: 1630107928806188}
-  AlwaysRotate: 1
+  ForceMultiplier: 1
 --- !u!212 &212238168333352878
 SpriteRenderer:
   m_ObjectHideFlags: 1
