@@ -101,7 +101,11 @@ public class BodyPartSelector : MonoBehaviour
                                     if (attach_to_bpc)
                                         Destroy(attach_to_bpc);
 
-                                    attacher.GetComponent<BodypartController>().ForceMultiplier = 2.0f;
+                                    if (attacher_bpc)
+                                        attacher_bpc.ForceMultiplier = 2.0f;
+
+                                    Destroy(attacher_ap);
+                                    Destroy(attach_to_ap);
                                     Done();
                                     return;
                                 }
