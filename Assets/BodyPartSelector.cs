@@ -34,12 +34,28 @@ public class BodyPartSelector : MonoBehaviour
                             if (bp == _target_part)
                                 continue;
 
+                            var bpi = bp.GetComponent<BodypartInfo>();
                             var ren = bp.GetComponent<SpriteRenderer>();
                             var mpb = new Vector3(mp.x, mp.y, ren.transform.position.z);
                             if (ren.bounds.Contains(mpb))
                             {
+                                var cbp = bp;
                                 _status = Status.Dragging;
-                                _dragged_object = bp;
+                                var parent = bpi.Parent;
+                                if (parent != null)
+                                {
+                                    while (true)
+                                    {
+                                        var parents_parent = parent.GetComponent<BodypartInfo>().Parent;
+
+                                        if (parents_parent == null)
+                                            break;
+
+                                        parent = parents_parent;
+                                        cbp = parent;
+                                    }
+                                }
+                                _dragged_object = cbp;
                                 break;
                             }
                         }
@@ -63,11 +79,11 @@ public class BodyPartSelector : MonoBehaviour
 
                         foreach (Transform tpap in _target_part.transform)
                         {
+                            if (tpap.tag != "AttachPoint")
+                                continue;
+
                             foreach (var doap in doaps)
                             {
-                                if (tpap.tag != "AttachPoint")
-                                    continue;
-
                                 if ((tpap.position - doap.position).magnitude < 0.5f)
                                 {
                                     var obj1 = tpap.parent;
@@ -78,11 +94,10 @@ public class BodyPartSelector : MonoBehaviour
                                     var attacher = obj2;
                                     var attacher_ap = doap;
 
-                                    var attach_to_bpc = attach_to.GetComponent<BodypartController>();
-                                    var attacher_bpc = attacher.GetComponent<BodypartController>();
+                                    var attach_to_info = attach_to.GetComponent<BodypartInfo>();
+                                    var attacher_info = attacher.GetComponent<BodypartInfo>();
 
-                                    if ((attach_to_bpc && attacher_bpc && obj1.GetComponent<BodypartController>().IsLegArm && !obj2.GetComponent<BodypartController>().IsLegArm)
-                                        || (attach_to_bpc && !attacher_bpc))
+                                    if (attach_to_info.IsLegArm && !attacher_info.IsLegArm)
                                     {
                                         attach_to = obj2;
                                         attacher = obj1;
@@ -90,8 +105,10 @@ public class BodyPartSelector : MonoBehaviour
                                         attacher_ap = tpap;
                                     }
 
-                                    attach_to_bpc = attach_to.GetComponent<BodypartController>();
-                                    attacher_bpc = attacher.GetComponent<BodypartController>();
+                                    var attach_to_bpc = attach_to.GetComponent<BodypartController>();
+                                    var attacher_bpc = attacher.GetComponent<BodypartController>();
+                                    attach_to_info = attach_to.GetComponent<BodypartInfo>();
+                                    attacher_info = attacher.GetComponent<BodypartInfo>();
 
                                     var hj = attach_to.gameObject.AddComponent<HingeJoint2D>();
                                     hj.connectedBody = attacher.gameObject.GetComponent<Rigidbody2D>();
@@ -104,8 +121,9 @@ public class BodyPartSelector : MonoBehaviour
                                     if (attacher_bpc)
                                         attacher_bpc.ForceMultiplier = 2.0f;
 
-                                    Destroy(attacher_ap);
-                                    Destroy(attach_to_ap);
+                                    attacher_info.Parent = attach_to.gameObject;
+                                    Destroy(attacher_ap.gameObject);
+                                    Destroy(attach_to_ap.gameObject);
                                     Done();
                                     return;
                                 }

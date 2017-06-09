@@ -5,7 +5,6 @@ using UnityEngine;
 public class BodypartController : MonoBehaviour
 {
     public GameObject[] PivotPoints;
-    public bool IsLegArm = false;
     public float ForceMultiplier = 1.0f;
     private GameObject _current_pivot;
     private SpriteRenderer _renderer;
