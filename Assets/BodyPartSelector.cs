@@ -10,9 +10,33 @@ public class BodyPartSelector : MonoBehaviour
         Dragging
     };
 
+    private struct DraggedSubObject
+    {
+        public Vector2 PosDiff;
+        public GameObject Obj;
+    };
+
+    private struct DraggedObject
+    {
+        public GameObject AttachPoint;
+        public List<DraggedSubObject> Items;
+    };
+
+    private struct TargetSubObject
+    {
+        public GameObject Obj;
+        public List<GameObject> AttachPoint;
+    };
+
+    private struct TargetObject
+    {
+        public List<GameObject> AttachPoints;
+    };
+
     private Status _status;
-    private GameObject _target_part;
-    private GameObject _dragged_object;
+    private TargetObject _target_object;
+    private DraggedObject _dragged_object;
+    private GameObject _plant;
 
     void Start()
     {
@@ -27,35 +51,20 @@ public class BodyPartSelector : MonoBehaviour
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        var bodyparts = GameObject.FindGameObjectsWithTag("Bodypart");
+                        var attachpoints = GameObject.FindGameObjectsWithTag("AttachPoint");
                         Vector2 mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                        foreach (var bp in bodyparts)
+                        foreach (var a in attachpoints)
                         {
-                            if (bp == _target_part)
+                            if (_target_object.AttachPoints.FindIndex((x) => x == a) != -1)
                                 continue;
 
-                            var bpi = bp.GetComponent<BodypartInfo>();
-                            var ren = bp.GetComponent<SpriteRenderer>();
+                            var ren = a.GetComponent<SpriteRenderer>();
                             var mpb = new Vector3(mp.x, mp.y, ren.transform.position.z);
                             if (ren.bounds.Contains(mpb))
                             {
-                                var cbp = bp;
+                                var d = CreateDraggedObject(a);
                                 _status = Status.Dragging;
-                                var parent = bpi.Parent;
-                                if (parent != null)
-                                {
-                                    while (true)
-                                    {
-                                        var parents_parent = parent.GetComponent<BodypartInfo>().Parent;
-
-                                        if (parents_parent == null)
-                                            break;
-
-                                        parent = parents_parent;
-                                        cbp = parent;
-                                    }
-                                }
-                                _dragged_object = cbp;
+                                _dragged_object = d;
                                 break;
                             }
                         }
@@ -65,34 +74,29 @@ public class BodyPartSelector : MonoBehaviour
             case Status.Dragging:
                 {
                     Vector2 mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    _dragged_object.transform.position = mp;
+
+                    foreach (var i in _dragged_object.Items)
+                    {
+                        i.Obj.transform.position = mp + i.PosDiff;
+                    }
 
                     if (Input.GetMouseButtonDown(0))
                     {
-                        var doaps = new List<Transform>();
-
-                        foreach (Transform c in _dragged_object.transform)
+                        foreach (GameObject toap in _target_object.AttachPoints)
                         {
-                            if (c.tag == "AttachPoint")
-                                doaps.Add(c);
-                        }
+                            var tpap = _dragged_object.AttachPoint;
 
-                        foreach (Transform tpap in _target_part.transform)
-                        {
-                            if (tpap.tag != "AttachPoint")
-                                continue;
-
-                            foreach (var doap in doaps)
+                            foreach (var di in _dragged_object.Items)
                             {
-                                if ((tpap.position - doap.position).magnitude < 0.5f)
+                                if ((tpap.transform.position - toap.transform.position).magnitude < 0.5f)
                                 {
-                                    var obj1 = tpap.parent;
-                                    var obj2 = doap.parent;
+                                    var obj1 = tpap.transform.parent;
+                                    var obj2 = toap.transform.parent;
 
                                     var attach_to = obj1;
                                     var attach_to_ap = tpap;
                                     var attacher = obj2;
-                                    var attacher_ap = doap;
+                                    var attacher_ap = toap;
 
                                     var attach_to_info = attach_to.GetComponent<BodypartInfo>();
                                     var attacher_info = attacher.GetComponent<BodypartInfo>();
@@ -101,7 +105,7 @@ public class BodyPartSelector : MonoBehaviour
                                     {
                                         attach_to = obj2;
                                         attacher = obj1;
-                                        attach_to_ap = doap;
+                                        attach_to_ap = toap;
                                         attacher_ap = tpap;
                                     }
 
@@ -112,8 +116,8 @@ public class BodyPartSelector : MonoBehaviour
 
                                     var hj = attach_to.gameObject.AddComponent<HingeJoint2D>();
                                     hj.connectedBody = attacher.gameObject.GetComponent<Rigidbody2D>();
-                                    hj.anchor = attach_to_ap.localPosition;
-                                    attacher.position = attach_to_ap.position + (attacher_ap.localPosition);
+                                    hj.anchor = attach_to_ap.transform.localPosition;
+                                    attacher.position = attach_to_ap.transform.position + (attacher_ap.transform.localPosition);
 
                                     if (attach_to_bpc)
                                         Destroy(attach_to_bpc);
@@ -122,6 +126,7 @@ public class BodyPartSelector : MonoBehaviour
                                         attacher_bpc.ForceMultiplier = 2.0f;
 
                                     attacher_info.Parent = attach_to.gameObject;
+                                    attach_to_info.Children.Add(attacher.gameObject);
                                     Destroy(attacher_ap.gameObject);
                                     Destroy(attach_to_ap.gameObject);
                                     Done();
@@ -138,14 +143,139 @@ public class BodyPartSelector : MonoBehaviour
 
     void Done()
     {
+        SetAttachpointVisible(false);
         Cursor.visible = false;
         Time.timeScale = 1;
+        Destroy(_plant);
         Destroy(gameObject);
     }
 
-    public void InititateSelection(GameObject bodypart)
+    private DraggedObject CreateDraggedObject(GameObject attachpoint)
     {
-        _target_part = bodypart;
+        var part = attachpoint.transform.parent.gameObject;
+        var root = FindRootPart(part);
+        var bpi = root.GetComponent<BodypartInfo>();
+        
+        List<DraggedSubObject> dsos = new List<DraggedSubObject>();
+        Vector2 mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 pp = root.transform.position;
+
+        DraggedSubObject root_dso = new DraggedSubObject()
+        {
+            Obj = root,
+            PosDiff = pp - mp
+        };
+
+        dsos.Add(root_dso);
+        AddAllDraggedChildren(dsos, root);
+        return new DraggedObject()
+        {
+            Items = dsos,
+            AttachPoint = attachpoint
+        };
+    }
+
+    private void AddAllDraggedChildren(List<DraggedSubObject> dsos, GameObject obj)
+    {
+        var parent_info = obj.GetComponent<BodypartInfo>();
+        Vector2 mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        foreach (var child in parent_info.Children)
+        {
+            Vector2 pp = child.transform.position;
+
+            DraggedSubObject dso = new DraggedSubObject()
+            {
+                Obj = child,
+                PosDiff = pp - mp
+            };
+            
+            dsos.Add(dso);
+            AddAllDraggedChildren(dsos, child);
+        }
+    }
+
+    private void AddAllTargetAttachpointChildren(List<GameObject> attachpoints, GameObject obj)
+    {
+        var parent_info = obj.GetComponent<BodypartInfo>();
+        Vector2 mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        foreach (var physics_child in parent_info.Children)
+        {
+            foreach (Transform trans_child in physics_child.transform)
+            {
+                if (trans_child.gameObject.tag == "AttachPoint")
+                    attachpoints.Add(trans_child.gameObject);
+            }
+
+            AddAllTargetAttachpointChildren(attachpoints, physics_child);
+        }
+    }
+
+    private List<GameObject> FindAllAttachPoints(GameObject obj)
+    {
+        var attachpoints = new List<GameObject>();
+
+        foreach (Transform c in obj.transform)
+        {
+            if (c.tag == "AttachPoint")
+                attachpoints.Add(c.gameObject);
+        }
+
+        return attachpoints;
+    }
+
+    public static GameObject FindRootPart(GameObject part)
+    {
+        var bpi = part.GetComponent<BodypartInfo>();
+
+        var p = bpi.Parent;
+        if (p == null)
+        {
+            p = part;
+        }
+        else
+        {
+            while (true)
+            {
+                var parents_parent = p.GetComponent<BodypartInfo>().Parent;
+
+                if (parents_parent == null)
+                    break;
+
+                p = parents_parent;
+            }
+        }
+
+        return p;
+    }
+
+    private TargetObject CreateTargetObject(GameObject part)
+    {
+        var root = FindRootPart(part);
+        List<GameObject> attachpoints = new List<GameObject>();
+        attachpoints.AddRange(FindAllAttachPoints(root));
+        AddAllTargetAttachpointChildren(attachpoints, root);
+
+        return new TargetObject()
+        {
+            AttachPoints = attachpoints
+        };
+    }
+
+    private void SetAttachpointVisible(bool visible)
+    {
+        var attachpoints = GameObject.FindGameObjectsWithTag("AttachPoint");
+
+        foreach (var a in attachpoints)
+        {
+            a.GetComponent<SpriteRenderer>().enabled = visible;
+        }
+    }
+
+    public void InititateSelection(GameObject bodypart, GameObject plant)
+    {
+        SetAttachpointVisible(true);
+        _target_object = CreateTargetObject(bodypart);
+        _plant = plant;
         Time.timeScale = 0;
         Cursor.visible = true;
     }
