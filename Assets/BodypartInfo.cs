@@ -5,11 +5,10 @@ using UnityEngine;
 public class BodypartInfo : MonoBehaviour
 {
     public bool IsLegArm = false;
-    public GameObject Parent = null;
-    public List<GameObject> Children;
+    public List<GameObject> MetaBody = null;
 
     void Start()
     {
-        Children = new List<GameObject>();
+        MetaBody = null;
     }
 }

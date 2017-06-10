@@ -14,23 +14,28 @@ public class PlantCollider : MonoBehaviour
         
     }
 
-    private bool CanConnectAttachpoints()
+    private bool CanConnectAttachpoints(GameObject obj)
     {
         var attachpoints = GameObject.FindGameObjectsWithTag("AttachPoint");
 
         if (attachpoints.Length < 2)
             return false;
 
-        var known_roots = new List<GameObject>();
+        int counter = attachpoints.Length;
+        var bpi = obj.GetComponent<BodypartInfo>();
 
-        foreach(var a in attachpoints)
+        if (bpi.MetaBody == null)
+            return true;
+        else
         {
-            var root = BodyPartSelector.FindRootPart(a.transform.parent.gameObject);
-            if (!known_roots.Contains(root))
-                known_roots.Add(root);
+            foreach (var part in bpi.MetaBody)
+            {
+                var points_in_part = BodyPartSelector.FindAllAttachPoints(part);
+                counter -= points_in_part.Count;
+            }
         }
 
-        return known_roots.Count >= 2;
+        return counter > 0;
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -38,11 +43,10 @@ public class PlantCollider : MonoBehaviour
         if (other.gameObject.tag != "Bodypart")
             return;
 
-        if (!CanConnectAttachpoints())
+        if (!CanConnectAttachpoints(other.gameObject))
             return;
 
-        var root_for_obj = BodyPartSelector.FindRootPart(other.gameObject);
-        var attach_points_for_obj = BodyPartSelector.FindAllAttachPointsInTree(root_for_obj);
+        var attach_points_for_obj = BodyPartSelector.FindAllAttachPoints(other.gameObject);
 
         if (attach_points_for_obj.Count == 0)
             return;

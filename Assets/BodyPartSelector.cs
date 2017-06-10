@@ -101,8 +101,7 @@ public class BodyPartSelector : MonoBehaviour
                                     var attach_to_info = attach_to.GetComponent<BodypartInfo>();
                                     var attacher_info = attacher.GetComponent<BodypartInfo>();
 
-                                    if ((attach_to_info.IsLegArm && !attacher_info.IsLegArm)
-                                        || attacher_info.Children.Count != 0)
+                                    if (attach_to_info.IsLegArm && !attacher_info.IsLegArm)
                                     {
                                         attach_to = obj2;
                                         attacher = obj1;
@@ -144,8 +143,7 @@ public class BodyPartSelector : MonoBehaviour
                                     if (attacher_bpc)
                                         attacher_bpc.ForceMultiplier = 2.9f;
 
-                                    attacher_info.Parent = attach_to.gameObject;
-                                    attach_to_info.Children.Add(attacher.gameObject);
+                                    CreateOrMergeMetabodies(attacher_info, attach_to_info);
                                     Done();
                                     attacher_ap.gameObject.tag = "Untagged";
                                     attach_to_ap.gameObject.tag = "Untagged";
@@ -160,6 +158,42 @@ public class BodyPartSelector : MonoBehaviour
         
     }
 
+    private void CreateOrMergeMetabodies(BodypartInfo part1, BodypartInfo part2)
+    {
+        if (part1.MetaBody == null && part1.MetaBody == null)
+        {
+            var metabody = new List<GameObject>();
+            part1.MetaBody = metabody;
+            part2.MetaBody = metabody;
+            metabody.Add(part1.gameObject);
+            metabody.Add(part2.gameObject);
+        }
+        else if (part1.MetaBody != null && part2.MetaBody != null)
+        {
+            var metabody = part1.MetaBody;
+            var old_metabody = part2.MetaBody;
+
+            foreach (var part in old_metabody)
+            {
+                var bpi = part.GetComponent<BodypartInfo>();
+                bpi.MetaBody = metabody;
+                metabody.Add(part);
+            }
+
+            old_metabody.Clear();
+        }
+        else if (part1.MetaBody == null)
+        {
+            part2.MetaBody.Add(part1.gameObject);
+            part1.MetaBody = part2.MetaBody;
+        }
+        else if (part2.MetaBody == null)
+        {
+            part1.MetaBody.Add(part2.gameObject);
+            part2.MetaBody = part1.MetaBody;
+        }
+    }
+
     void Done()
     {
         SetAttachpointVisible(false);
@@ -172,21 +206,34 @@ public class BodyPartSelector : MonoBehaviour
     private DraggedObject CreateDraggedObject(GameObject attachpoint)
     {
         var part = attachpoint.transform.parent.gameObject;
-        var root = FindRootPart(part);
-        var bpi = root.GetComponent<BodypartInfo>();
-        
+        var bpi = part.GetComponent<BodypartInfo>();
         List<DraggedSubObject> dsos = new List<DraggedSubObject>();
         Vector2 mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 pp = root.transform.position;
 
-        DraggedSubObject root_dso = new DraggedSubObject()
+        if (bpi.MetaBody == null)
         {
-            Obj = root,
-            PosDiff = pp - mp
-        };
+            Vector2 pp = part.transform.position;
+            DraggedSubObject dso = new DraggedSubObject()
+            {
+                Obj = part,
+                PosDiff = pp - mp
+            };
+            dsos.Add(dso);
+        }
+        else
+        {
+            foreach(var metapart in bpi.MetaBody)
+            {
+                Vector2 pp = metapart.transform.position;
+                DraggedSubObject dso = new DraggedSubObject()
+                {
+                    Obj = metapart,
+                    PosDiff = pp - mp
+                };
+                dsos.Add(dso);
+            }
+        }
 
-        dsos.Add(root_dso);
-        AddAllDraggedChildren(dsos, root);
         return new DraggedObject()
         {
             Items = dsos,
@@ -194,107 +241,72 @@ public class BodyPartSelector : MonoBehaviour
         };
     }
 
-    private void AddAllDraggedChildren(List<DraggedSubObject> dsos, GameObject obj)
+    private void AddAllDraggedParts(List<DraggedSubObject> dsos, GameObject obj)
     {
-        var parent_info = obj.GetComponent<BodypartInfo>();
+        var bpi = obj.GetComponent<BodypartInfo>();
         Vector2 mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        foreach (var child in parent_info.Children)
+        if (bpi.MetaBody == null)
         {
-            Vector2 pp = child.transform.position;
+            Vector2 pp = obj.transform.position;
 
             DraggedSubObject dso = new DraggedSubObject()
             {
-                Obj = child,
+                Obj = obj,
                 PosDiff = pp - mp
             };
-            
+
             dsos.Add(dso);
-            AddAllDraggedChildren(dsos, child);
-        }
-    }
-
-    private void AddAllTargetAttachpointChildren(List<GameObject> attachpoints, GameObject obj)
-    {
-        var parent_info = obj.GetComponent<BodypartInfo>();
-        Vector2 mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        foreach (var physics_child in parent_info.Children)
-        {
-            foreach (Transform trans_child in physics_child.transform)
-            {
-                if (trans_child.gameObject.tag == "AttachPoint")
-                    attachpoints.Add(trans_child.gameObject);
-            }
-
-            AddAllTargetAttachpointChildren(attachpoints, physics_child);
-        }
-    }
-
-    private List<GameObject> FindAllAttachPoints(GameObject obj)
-    {
-        var attachpoints = new List<GameObject>();
-
-        foreach (Transform c in obj.transform)
-        {
-            if (c.tag == "AttachPoint")
-                attachpoints.Add(c.gameObject);
-        }
-
-        return attachpoints;
-    }
-
-    public static void AddAllAttachPointsInTree(GameObject obj, List<GameObject> attachpoints)
-    {
-        foreach (Transform c in obj.transform)
-        {
-            if (c.tag == "AttachPoint")
-                attachpoints.Add(c.gameObject);
-
-            AddAllAttachPointsInTree(c.gameObject, attachpoints);
-        }
-    }
-
-    public static List<GameObject> FindAllAttachPointsInTree(GameObject obj)
-    {
-        var attachpoints = new List<GameObject>();
-        AddAllAttachPointsInTree(obj, attachpoints);
-        return attachpoints;
-    }
-
-    public static GameObject FindRootPart(GameObject part)
-    {
-        var bpi = part.GetComponent<BodypartInfo>();
-
-        var p = bpi.Parent;
-        if (p == null)
-        {
-            p = part;
         }
         else
         {
-            while (true)
+            foreach (var part in bpi.MetaBody)
             {
-                var parents_parent = p.GetComponent<BodypartInfo>().Parent;
+                Vector2 pp = part.transform.position;
 
-                if (parents_parent == null)
-                    break;
+                DraggedSubObject dso = new DraggedSubObject()
+                {
+                    Obj = part,
+                    PosDiff = pp - mp
+                };
 
-                p = parents_parent;
+                dsos.Add(dso);
             }
         }
-
-        return p;
     }
 
+    public static void AddAllAttachPoints(List<GameObject> attachpoints, GameObject obj)
+    {
+        foreach (Transform c in obj.transform)
+        {
+            if (c.tag == "AttachPoint")
+                attachpoints.Add(c.gameObject);
+        }
+    }
+
+    public static List<GameObject> FindAllAttachPoints(GameObject part)
+    {
+        var bpi = part.GetComponent<BodypartInfo>();
+        var attachpoints = new List<GameObject>();
+
+        if (bpi.MetaBody == null)
+        {
+            AddAllAttachPoints(attachpoints, part);
+            return attachpoints;
+        }
+
+        foreach(var obj in bpi.MetaBody)
+        {
+            AddAllAttachPoints(attachpoints, obj);
+        }
+
+        return attachpoints;
+    }
+    
     private TargetObject CreateTargetObject(GameObject part)
     {
-        var root = FindRootPart(part);
-        List<GameObject> attachpoints = new List<GameObject>();
-        attachpoints.AddRange(FindAllAttachPoints(root));
-        AddAllTargetAttachpointChildren(attachpoints, root);
-
         return new TargetObject()
         {
-            AttachPoints = attachpoints
+            AttachPoints = FindAllAttachPoints(part)
         };
     }
 
