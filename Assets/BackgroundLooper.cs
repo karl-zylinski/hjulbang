@@ -9,6 +9,7 @@ public class BackgroundLooper : MonoBehaviour
     private GameObject _current_front;
     public float YOffset = 0;
     public float XOverlap = 0;
+    public float XOffset = 0;
 
     private Sprite GetNewBackground()
     {
@@ -19,7 +20,7 @@ public class BackgroundLooper : MonoBehaviour
     {
         if (_current_front == null)
         {
-            return new Vector2(20.0f, YOffset);
+            return new Vector2(XOffset + 20.0f, YOffset);
         }
 
         var x = XOverlap + _current_front.transform.position.x - _current_front.GetComponent<SpriteRenderer>().bounds.size.x / 2 - new_sprite.bounds.size.x / 2;
