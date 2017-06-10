@@ -117,6 +117,8 @@ public class BodyPartSelector : MonoBehaviour
                                     var hj = attach_to.gameObject.AddComponent<HingeJoint2D>();
                                     hj.connectedBody = attacher.gameObject.GetComponent<Rigidbody2D>();
                                     hj.anchor = attach_to_ap.transform.localPosition;
+                                    hj.autoConfigureConnectedAnchor = false;
+                                    hj.connectedAnchor = attacher_ap.transform.localPosition;
                                     attacher.position = attach_to_ap.transform.position + (attacher_ap.transform.localPosition);
 
                                     if (attach_to_bpc)
