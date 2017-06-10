@@ -28,6 +28,7 @@ public class CollisionBoxLooper : MonoBehaviour
     private void CreateNewFront()
     {
         var go = new GameObject("ground collider");
+        go.tag = "Ground";
         var bc = go.AddComponent<BoxCollider2D>();
         bc.size = new Vector2(24, 3);
         go.transform.parent = transform;

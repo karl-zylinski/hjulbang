@@ -101,7 +101,8 @@ public class BodyPartSelector : MonoBehaviour
                                     var attach_to_info = attach_to.GetComponent<BodypartInfo>();
                                     var attacher_info = attacher.GetComponent<BodypartInfo>();
 
-                                    if ((attach_to_info.IsLegArm && !attacher_info.IsLegArm))
+                                    if ((attach_to_info.IsLegArm && !attacher_info.IsLegArm)
+                                        || attacher_info.Children.Count != 0)
                                     {
                                         attach_to = obj2;
                                         attacher = obj1;
@@ -134,17 +135,20 @@ public class BodyPartSelector : MonoBehaviour
 
                                     attacher.position = attach_to_ap.transform.position + (attacher_ap.transform.localPosition);
 
-                                    if (attach_to_bpc)
+                                    if (!attach_to_info.IsLegArm)
                                         Destroy(attach_to_bpc);
+
+                                    if (!attacher_info.IsLegArm)
+                                        Destroy(attacher_bpc);
 
                                     if (attacher_bpc)
                                         attacher_bpc.ForceMultiplier = 2.9f;
 
                                     attacher_info.Parent = attach_to.gameObject;
                                     attach_to_info.Children.Add(attacher.gameObject);
-                                    Destroy(attacher_ap.gameObject);
-                                    Destroy(attach_to_ap.gameObject);
                                     Done();
+                                    attacher_ap.gameObject.tag = "Untagged";
+                                    attach_to_ap.gameObject.tag = "Untagged";
                                     return;
                                 }
                             }

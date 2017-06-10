@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Bodypart
   - AttachPoint
+  - Ground
   layers:
   - Default
   - TransparentFX
