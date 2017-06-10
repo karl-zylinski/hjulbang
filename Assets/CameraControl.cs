@@ -21,6 +21,6 @@ public class CameraControl : MonoBehaviour
             y += 1;
         if (Input.GetKey(KeyCode.DownArrow))
             y -= 1;
-        transform.position = transform.position + new Vector3(x, y, 0) * Time.unscaledDeltaTime * 10;
+        transform.position = transform.position + new Vector3(x, 0, 0) * Time.unscaledDeltaTime * 10;
     }
 }

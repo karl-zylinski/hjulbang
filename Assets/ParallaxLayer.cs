@@ -13,7 +13,7 @@ public class ParallaxLayer : MonoBehaviour
     void Update()
     {
         Vector2 pos = transform.position;
-        pos.x = -Camera.main.transform.position.x * ParallaxAmount;
+        pos.x = Camera.main.transform.position.x * ParallaxAmount;
         transform.position = pos;
     }
 }

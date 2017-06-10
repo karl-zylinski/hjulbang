@@ -101,7 +101,7 @@ public class BodyPartSelector : MonoBehaviour
                                     var attach_to_info = attach_to.GetComponent<BodypartInfo>();
                                     var attacher_info = attacher.GetComponent<BodypartInfo>();
 
-                                    if (attach_to_info.IsLegArm && !attacher_info.IsLegArm)
+                                    if ((attach_to_info.IsLegArm && !attacher_info.IsLegArm))
                                     {
                                         attach_to = obj2;
                                         attacher = obj1;
@@ -109,12 +109,11 @@ public class BodyPartSelector : MonoBehaviour
                                         attacher_ap = tpap;
                                     }
 
-                                    var none_is_leg = !attacher_info.IsLegArm && !attach_to_info.IsLegArm;
-
                                     var attach_to_bpc = attach_to.GetComponent<BodypartController>();
                                     var attacher_bpc = attacher.GetComponent<BodypartController>();
                                     attach_to_info = attach_to.GetComponent<BodypartInfo>();
                                     attacher_info = attacher.GetComponent<BodypartInfo>();
+                                    var none_is_leg = !attacher_info.IsLegArm && !attach_to_info.IsLegArm;
 
                                     if (none_is_leg)
                                     {
@@ -132,7 +131,6 @@ public class BodyPartSelector : MonoBehaviour
                                         hj.autoConfigureConnectedAnchor = false;
                                         hj.connectedAnchor = attacher_ap.transform.localPosition;
                                     }
-                                    
 
                                     attacher.position = attach_to_ap.transform.position + (attacher_ap.transform.localPosition);
 
@@ -140,7 +138,7 @@ public class BodyPartSelector : MonoBehaviour
                                         Destroy(attach_to_bpc);
 
                                     if (attacher_bpc)
-                                        attacher_bpc.ForceMultiplier = 3.0f;
+                                        attacher_bpc.ForceMultiplier = 2.9f;
 
                                     attacher_info.Parent = attach_to.gameObject;
                                     attach_to_info.Children.Add(attacher.gameObject);
