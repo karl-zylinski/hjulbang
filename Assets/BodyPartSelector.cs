@@ -109,23 +109,38 @@ public class BodyPartSelector : MonoBehaviour
                                         attacher_ap = tpap;
                                     }
 
+                                    var none_is_leg = !attacher_info.IsLegArm && !attach_to_info.IsLegArm;
+
                                     var attach_to_bpc = attach_to.GetComponent<BodypartController>();
                                     var attacher_bpc = attacher.GetComponent<BodypartController>();
                                     attach_to_info = attach_to.GetComponent<BodypartInfo>();
                                     attacher_info = attacher.GetComponent<BodypartInfo>();
 
-                                    var hj = attach_to.gameObject.AddComponent<HingeJoint2D>();
-                                    hj.connectedBody = attacher.gameObject.GetComponent<Rigidbody2D>();
-                                    hj.anchor = attach_to_ap.transform.localPosition;
-                                    hj.autoConfigureConnectedAnchor = false;
-                                    hj.connectedAnchor = attacher_ap.transform.localPosition;
+                                    if (none_is_leg)
+                                    {
+                                        var fj = attach_to.gameObject.AddComponent<FixedJoint2D>();
+                                        fj.connectedBody = attacher.gameObject.GetComponent<Rigidbody2D>();
+                                        fj.anchor = attach_to_ap.transform.localPosition;
+                                        fj.autoConfigureConnectedAnchor = false;
+                                        fj.connectedAnchor = attacher_ap.transform.localPosition;
+                                    }
+                                    else
+                                    {
+                                        var hj = attach_to.gameObject.AddComponent<HingeJoint2D>();
+                                        hj.connectedBody = attacher.gameObject.GetComponent<Rigidbody2D>();
+                                        hj.anchor = attach_to_ap.transform.localPosition;
+                                        hj.autoConfigureConnectedAnchor = false;
+                                        hj.connectedAnchor = attacher_ap.transform.localPosition;
+                                    }
+                                    
+
                                     attacher.position = attach_to_ap.transform.position + (attacher_ap.transform.localPosition);
 
                                     if (attach_to_bpc)
                                         Destroy(attach_to_bpc);
 
                                     if (attacher_bpc)
-                                        attacher_bpc.ForceMultiplier = 2.0f;
+                                        attacher_bpc.ForceMultiplier = 3.0f;
 
                                     attacher_info.Parent = attach_to.gameObject;
                                     attach_to_info.Children.Add(attacher.gameObject);
@@ -222,6 +237,24 @@ public class BodyPartSelector : MonoBehaviour
                 attachpoints.Add(c.gameObject);
         }
 
+        return attachpoints;
+    }
+
+    public static void AddAllAttachPointsInTree(GameObject obj, List<GameObject> attachpoints)
+    {
+        foreach (Transform c in obj.transform)
+        {
+            if (c.tag == "AttachPoint")
+                attachpoints.Add(c.gameObject);
+
+            AddAllAttachPointsInTree(c.gameObject, attachpoints);
+        }
+    }
+
+    public static List<GameObject> FindAllAttachPointsInTree(GameObject obj)
+    {
+        var attachpoints = new List<GameObject>();
+        AddAllAttachPointsInTree(obj, attachpoints);
         return attachpoints;
     }
 

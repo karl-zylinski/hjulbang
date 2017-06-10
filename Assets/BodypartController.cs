@@ -50,6 +50,7 @@ public class BodypartController : MonoBehaviour
         _renderer = GetComponent<SpriteRenderer>();
         _rb = GetComponent<Rigidbody2D>();
         _current_pivot = PivotPoints[0];
+        _force_timeout = Random.Range(0.5f, 3.0f);
     }
 
     void Update()
@@ -80,7 +81,12 @@ public class BodypartController : MonoBehaviour
             transform.Rotate(0, 0, Time.deltaTime);
 
         const float TIMEOUT_FORCE = 1.0f;
-        _force_timeout = Random.Range(TIMEOUT_FORCE*0.8f, TIMEOUT_FORCE*1.2f);
+
+        var upper_mult = 3.0f;
+        if (gameObject.layer == 9)
+            upper_mult = 1.2f;
+
+        _force_timeout = Random.Range(TIMEOUT_FORCE*0.8f, TIMEOUT_FORCE*upper_mult);
 
         var force_dir_obj = pivot.transform.GetChild(0);
         var force_dir = (force_dir_obj.transform.position - pivot.transform.position).normalized * 2.6f * ForceMultiplier;

@@ -41,6 +41,12 @@ public class PlantCollider : MonoBehaviour
         if (!CanConnectAttachpoints())
             return;
 
+        var root_for_obj = BodyPartSelector.FindRootPart(other.gameObject);
+        var attach_points_for_obj = BodyPartSelector.FindAllAttachPointsInTree(root_for_obj);
+
+        if (attach_points_for_obj.Count == 0)
+            return;
+
         var bps = Resources.Load("BodyPartSelector") as GameObject;
         var go = Instantiate(bps);
         go.GetComponent<BodyPartSelector>().InititateSelection(other.gameObject, gameObject);
