@@ -42,6 +42,9 @@ public class CollisionBoxLooper : MonoBehaviour
 
     void Update()
     {
+        if (Done)
+            return;
+
         Vector2 cp = Camera.main.transform.position;
         var front_metabody = Camera.main.GetComponent<CameraControl>().MetabodiesByXCoord[0];
 

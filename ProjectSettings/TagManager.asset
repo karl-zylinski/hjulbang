@@ -8,6 +8,7 @@ TagManager:
   - AttachPoint
   - Ground
   - PlantSpawner
+  - EndScreen
   layers:
   - Default
   - TransparentFX
