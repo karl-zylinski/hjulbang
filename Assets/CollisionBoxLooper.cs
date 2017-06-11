@@ -8,11 +8,13 @@ public class CollisionBoxLooper : MonoBehaviour
     public float Height = 2;
     private GameObject _current_front;
     public PhysicsMaterial2D GroundMaterial;
+    public bool Done = false;
 
     void Start()
     {
         CreateNewFront();
         CreateNewFront();
+        Done = false;
     }
 
     private Vector2 GetNewFrontPos(BoxCollider2D new_collider)
@@ -26,7 +28,7 @@ public class CollisionBoxLooper : MonoBehaviour
         return new Vector2(x, YPos);
     }
 
-    private void CreateNewFront()
+    public void CreateNewFront()
     {
         var go = new GameObject("ground collider");
         go.tag = "Ground";

@@ -12,6 +12,9 @@ public class BackgroundLooper : MonoBehaviour
     public float XOffset = 0;
     private int _num_spawned;
     public bool SpawnPlants = false;
+    public GameObject LastScreen;
+    public bool Done = false;
+    public Sprite PureGround;
 
     private Sprite GetNewBackground()
     {
@@ -29,9 +32,8 @@ public class BackgroundLooper : MonoBehaviour
         return new Vector2(x, YOffset);
     }
 
-    private void CreateNewFront()
+    private void CreateNewFront(Sprite sprite)
     {
-        var sprite = GetNewBackground();
         var new_pos = GetNewFrontPos(sprite);
         var bg = new GameObject("bg");
         var sr = bg.AddComponent<SpriteRenderer>();
@@ -56,12 +58,66 @@ public class BackgroundLooper : MonoBehaviour
     void Start()
     {
         _num_spawned = 0;
-        CreateNewFront();
-        CreateNewFront();
+        Done = false;
+        CreateNewFront(GetNewBackground());
+        CreateNewFront(GetNewBackground());
     }
 
     void Update()
     {
+        if (Done == true)
+            return;
+
+        var attachpoints = GameObject.FindGameObjectsWithTag("AttachPoint");
+
+        if (attachpoints.Length < 2)
+        {
+            if (LastScreen == null)
+                return;
+
+            /*for (int i = 0; i < 2; ++i)
+            {
+                var pos_x = _current_front.transform.position.x - _current_front.GetComponent<SpriteRenderer>().bounds.size.x / 2 - PureGround.bounds.size.x / 2;
+                var new_pos = new Vector2(pos_x, -3.0f);
+                var bg = new GameObject("bg");
+                var sr = bg.AddComponent<SpriteRenderer>();
+                bg.transform.parent = transform;
+                sr.sprite = PureGround;
+                sr.sortingOrder = -4;
+                bg.transform.position = new_pos;
+                ++_num_spawned;
+                _current_front = bg;
+                GameObject.Find("CollisionBoxLooper").GetComponent<CollisionBoxLooper>().CreateNewFront();
+            }*/
+
+            var obj = Instantiate(LastScreen);
+            var srs = obj.GetComponentsInChildren<SpriteRenderer>();
+
+            var min_x = srs[0].bounds.min.x;
+            var max_x = srs[0].bounds.max.x;
+
+            foreach(var sr in srs)
+            {
+                if (sr.bounds.min.x < min_x)
+                    min_x = sr.bounds.min.x;
+
+                if (sr.bounds.max.x > max_x)
+                    max_x = sr.bounds.max.x;
+            }
+
+            var size = max_x - min_x;
+            var x = _current_front.transform.position.x - _current_front.GetComponent<SpriteRenderer>().bounds.size.x / 2 - size / 2;
+            var pos = new Vector2(x, 0.96f);
+            obj.transform.position = pos;
+            GameObject.Find("CollisionBoxLooper").GetComponent<CollisionBoxLooper>().Done = true;
+            var bls = FindObjectsOfType<BackgroundLooper>();
+            foreach(var bl in bls)
+            {
+                bl.Done = true;
+            }
+            return;
+        }
+
         Vector2 cp = Camera.main.transform.position;
         var front_metabody = Camera.main.GetComponent<CameraControl>().MetabodiesByXCoord[0];
 
@@ -76,7 +132,7 @@ public class BackgroundLooper : MonoBehaviour
             var dist = cfb.min.x - (front_body.transform.position.x - Camera.main.orthographicSize * Camera.main.aspect);
             if (Mathf.Abs(dist) < 1)
             {
-                CreateNewFront();
+                CreateNewFront(GetNewBackground());
             }
             else
                 break;
