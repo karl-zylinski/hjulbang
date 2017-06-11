@@ -14,6 +14,12 @@ public class PlantCollider : MonoBehaviour
         
     }
 
+    public void SetUsed()
+    {
+        Destroy(GetComponent<Collider2D>());
+        Destroy(transform.GetChild(0).gameObject);
+    }
+
     private bool CanConnectAttachpoints(GameObject obj)
     {
         var attachpoints = GameObject.FindGameObjectsWithTag("AttachPoint");

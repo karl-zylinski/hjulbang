@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CameraControl : MonoBehaviour
 {
+
     void Start()
     {
         
@@ -14,6 +15,7 @@ public class CameraControl : MonoBehaviour
     {
         var x = 0;
         var y = 0;
+
         if (Input.GetKey(KeyCode.LeftArrow))
             x -= 1;
         if (Input.GetKey(KeyCode.RightArrow))
@@ -22,6 +24,10 @@ public class CameraControl : MonoBehaviour
             y += 1;
         if (Input.GetKey(KeyCode.DownArrow))
             y -= 1;
+
+        if (Input.GetKey(KeyCode.RightShift))
+            x = x * 3;
+
         var new_pos = transform.position + new Vector3(x, 0, 0) * Time.unscaledDeltaTime * 10;
 
         var parts = GameObject.FindGameObjectsWithTag("Bodypart");

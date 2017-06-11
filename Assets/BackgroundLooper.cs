@@ -10,6 +10,8 @@ public class BackgroundLooper : MonoBehaviour
     public float YOffset = 0;
     public float XOverlap = 0;
     public float XOffset = 0;
+    private int _num_spawned;
+    public bool SpawnPlants = false;
 
     private Sprite GetNewBackground()
     {
@@ -37,11 +39,23 @@ public class BackgroundLooper : MonoBehaviour
         sr.sprite = sprite;
         sr.sortingOrder = Order;
         bg.transform.position = new_pos;
+
+        if (SpawnPlants && _num_spawned > 1)
+        {
+            var spawner = GameObject.FindWithTag("PlantSpawner");
+            var num_to_spawn = Random.Range(2, 4);
+
+            for (int i = 0; i < num_to_spawn; ++i)
+                spawner.GetComponent<PlantSpawner>().NewScreenAdded(sr.bounds.min.x, sr.bounds.max.x);
+        }
+
+        ++_num_spawned;
         _current_front = bg;
     }
 
     void Start()
     {
+        _num_spawned = 0;
         CreateNewFront();
         CreateNewFront();
     }

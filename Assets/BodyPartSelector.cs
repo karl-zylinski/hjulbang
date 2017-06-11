@@ -199,7 +199,7 @@ public class BodyPartSelector : MonoBehaviour
         SetAttachpointVisible(false);
         Cursor.visible = false;
         Time.timeScale = 1;
-        Destroy(_plant);
+        _plant.GetComponent<PlantCollider>().SetUsed();
         Destroy(gameObject);
     }
 
