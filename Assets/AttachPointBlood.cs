@@ -23,6 +23,7 @@ public class AttachPointBlood : MonoBehaviour
             Vector2 pos = transform.position;
             pos.y = pos.y - 0.5f;
             var blood = new GameObject("blood");
+            blood.AddComponent<BloodDecay>();
             var sr = blood.AddComponent<SpriteRenderer>();
             sr.sprite = Sprites[Random.Range(0, Sprites.Length - 1)];
             sr.sortingOrder = -1;

@@ -61,6 +61,7 @@ public class BackgroundLooper : MonoBehaviour
         Done = false;
         CreateNewFront(GetNewBackground());
         CreateNewFront(GetNewBackground());
+        CreateNewFront(GetNewBackground());
     }
 
     void Update()

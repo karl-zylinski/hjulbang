@@ -42,6 +42,7 @@ public class CameraControl : MonoBehaviour
         UpdateMetabodiesByXCoord();
         _following = MetabodiesByXCoord[_follow_index][0];
         _wanted_x = _following.transform.position.x;
+
         Vector3 current_pos = Camera.main.transform.position;
         var diff = (_wanted_x - current_pos.x);
         var new_x = current_pos.x + diff * Time.unscaledDeltaTime * 10.0f;

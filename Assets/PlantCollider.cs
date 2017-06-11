@@ -28,14 +28,8 @@ public class PlantCollider : MonoBehaviour
             return false;
 
         int counter = attachpoints.Length;
-        var bpi = obj.GetComponent<BodypartInfo>();
-
-        foreach (var part in bpi.MetaBody)
-        {
-            var points_in_part = BodyPartSelector.FindAllAttachPoints(part);
-            counter -= points_in_part.Count;
-        }
-
+        var points_in_part = BodyPartSelector.FindAllAttachPoints(obj);
+        counter -= points_in_part.Count;
         return counter > 0;
     }
 

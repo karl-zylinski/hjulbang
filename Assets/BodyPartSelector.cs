@@ -7,7 +7,8 @@ public class BodyPartSelector : MonoBehaviour
     private enum Status
     {
         Choosing,
-        Dragging
+        Dragging,
+        Done
     };
 
     private struct DraggedSubObject
@@ -154,6 +155,8 @@ public class BodyPartSelector : MonoBehaviour
                     }
                 }
                 break;
+            case Status.Done:
+                break;
         }
     }
 
@@ -175,10 +178,12 @@ public class BodyPartSelector : MonoBehaviour
 
     void Done()
     {
+        _status = Status.Done;
         SetAttachpointVisible(false);
         Cursor.visible = false;
         Time.timeScale = 1;
         _plant.GetComponent<PlantCollider>().SetUsed();
+
         Destroy(gameObject);
     }
 
@@ -191,6 +196,7 @@ public class BodyPartSelector : MonoBehaviour
 
         foreach (var metapart in bpi.MetaBody)
         {
+            var mbpi = metapart.GetComponent<BodypartInfo>();
             Vector2 pp = metapart.transform.position;
             DraggedSubObject dso = new DraggedSubObject()
             {
