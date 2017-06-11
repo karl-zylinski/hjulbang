@@ -30,15 +30,10 @@ public class PlantCollider : MonoBehaviour
         int counter = attachpoints.Length;
         var bpi = obj.GetComponent<BodypartInfo>();
 
-        if (bpi.MetaBody == null)
-            return true;
-        else
+        foreach (var part in bpi.MetaBody)
         {
-            foreach (var part in bpi.MetaBody)
-            {
-                var points_in_part = BodyPartSelector.FindAllAttachPoints(part);
-                counter -= points_in_part.Count;
-            }
+            var points_in_part = BodyPartSelector.FindAllAttachPoints(part);
+            counter -= points_in_part.Count;
         }
 
         return counter > 0;

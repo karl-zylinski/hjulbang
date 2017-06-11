@@ -63,11 +63,23 @@ public class BackgroundLooper : MonoBehaviour
     void Update()
     {
         Vector2 cp = Camera.main.transform.position;
-        var cfb = _current_front.GetComponent<SpriteRenderer>().bounds;
-        var dist = cfb.min.x - (cp.x - Camera.main.orthographicSize * Camera.main.aspect);
-        if (Mathf.Abs(dist) < 1)
+        var front_metabody = Camera.main.GetComponent<CameraControl>().MetabodiesByXCoord[0];
+
+        if (front_metabody.Count == 0)
+            return;
+
+        var front_body = front_metabody[0];
+
+        while (true)
         {
-            CreateNewFront();
+            var cfb = _current_front.GetComponent<SpriteRenderer>().bounds;
+            var dist = cfb.min.x - (front_body.transform.position.x - Camera.main.orthographicSize * Camera.main.aspect);
+            if (Mathf.Abs(dist) < 1)
+            {
+                CreateNewFront();
+            }
+            else
+                break;
         }
     }
 }

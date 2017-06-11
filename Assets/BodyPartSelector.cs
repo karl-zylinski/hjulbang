@@ -155,43 +155,22 @@ public class BodyPartSelector : MonoBehaviour
                 }
                 break;
         }
-        
     }
 
     private void CreateOrMergeMetabodies(BodypartInfo part1, BodypartInfo part2)
     {
-        if (part1.MetaBody == null && part1.MetaBody == null)
-        {
-            var metabody = new List<GameObject>();
-            part1.MetaBody = metabody;
-            part2.MetaBody = metabody;
-            metabody.Add(part1.gameObject);
-            metabody.Add(part2.gameObject);
-        }
-        else if (part1.MetaBody != null && part2.MetaBody != null)
-        {
-            var metabody = part1.MetaBody;
-            var old_metabody = part2.MetaBody;
+        var metabody = part1.MetaBody;
+        var old_metabody = part2.MetaBody;
 
-            foreach (var part in old_metabody)
-            {
-                var bpi = part.GetComponent<BodypartInfo>();
-                bpi.MetaBody = metabody;
-                metabody.Add(part);
-            }
+        foreach (var part in old_metabody)
+        {
+            var bpi = part.GetComponent<BodypartInfo>();
+            bpi.MetaBody = metabody;
+            metabody.Add(part);
+        }
 
-            old_metabody.Clear();
-        }
-        else if (part1.MetaBody == null)
-        {
-            part2.MetaBody.Add(part1.gameObject);
-            part1.MetaBody = part2.MetaBody;
-        }
-        else if (part2.MetaBody == null)
-        {
-            part1.MetaBody.Add(part2.gameObject);
-            part2.MetaBody = part1.MetaBody;
-        }
+        part2.MetaBody = metabody;
+        old_metabody.Clear();
     }
 
     void Done()
@@ -210,28 +189,15 @@ public class BodyPartSelector : MonoBehaviour
         List<DraggedSubObject> dsos = new List<DraggedSubObject>();
         Vector2 mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        if (bpi.MetaBody == null)
+        foreach (var metapart in bpi.MetaBody)
         {
-            Vector2 pp = part.transform.position;
+            Vector2 pp = metapart.transform.position;
             DraggedSubObject dso = new DraggedSubObject()
             {
-                Obj = part,
+                Obj = metapart,
                 PosDiff = pp - mp
             };
             dsos.Add(dso);
-        }
-        else
-        {
-            foreach(var metapart in bpi.MetaBody)
-            {
-                Vector2 pp = metapart.transform.position;
-                DraggedSubObject dso = new DraggedSubObject()
-                {
-                    Obj = metapart,
-                    PosDiff = pp - mp
-                };
-                dsos.Add(dso);
-            }
         }
 
         return new DraggedObject()
@@ -245,32 +211,17 @@ public class BodyPartSelector : MonoBehaviour
     {
         var bpi = obj.GetComponent<BodypartInfo>();
         Vector2 mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        if (bpi.MetaBody == null)
+        foreach (var part in bpi.MetaBody)
         {
-            Vector2 pp = obj.transform.position;
+            Vector2 pp = part.transform.position;
 
             DraggedSubObject dso = new DraggedSubObject()
             {
-                Obj = obj,
+                Obj = part,
                 PosDiff = pp - mp
             };
 
             dsos.Add(dso);
-        }
-        else
-        {
-            foreach (var part in bpi.MetaBody)
-            {
-                Vector2 pp = part.transform.position;
-
-                DraggedSubObject dso = new DraggedSubObject()
-                {
-                    Obj = part,
-                    PosDiff = pp - mp
-                };
-
-                dsos.Add(dso);
-            }
         }
     }
 
@@ -287,13 +238,7 @@ public class BodyPartSelector : MonoBehaviour
     {
         var bpi = part.GetComponent<BodypartInfo>();
         var attachpoints = new List<GameObject>();
-
-        if (bpi.MetaBody == null)
-        {
-            AddAllAttachPoints(attachpoints, part);
-            return attachpoints;
-        }
-
+        
         foreach(var obj in bpi.MetaBody)
         {
             AddAllAttachPoints(attachpoints, obj);
@@ -316,14 +261,22 @@ public class BodyPartSelector : MonoBehaviour
 
         foreach (var a in attachpoints)
         {
-            a.GetComponent<SpriteRenderer>().enabled = visible;
+            var sr = a.GetComponent<SpriteRenderer>();
+            sr.enabled = visible;
+            sr.color = new Color(1, 0, 0, 1);
         }
     }
 
     public void InititateSelection(GameObject bodypart, GameObject plant)
     {
         SetAttachpointVisible(true);
+        Camera.main.GetComponent<CameraControl>().Focus(bodypart);
         _target_object = CreateTargetObject(bodypart);
+        foreach (var a in _target_object.AttachPoints)
+        {
+            var sr = a.GetComponent<SpriteRenderer>();
+            sr.color = new Color(0, 1, 0, 1);
+        }
         _plant = plant;
         Time.timeScale = 0;
         Cursor.visible = true;
