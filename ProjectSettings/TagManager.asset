@@ -9,6 +9,7 @@ TagManager:
   - Ground
   - PlantSpawner
   - EndScreen
+  - Music
   layers:
   - Default
   - TransparentFX

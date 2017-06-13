@@ -14,6 +14,7 @@ public class CollisionBoxLooper : MonoBehaviour
     {
         CreateNewFront();
         CreateNewFront();
+        CreateNewFront();
         Done = false;
     }
 

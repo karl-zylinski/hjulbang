@@ -19,6 +19,9 @@ public class AttachPointAudio : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        if (transform.position.x > 9.5f)
+            return;
+
         if (Random.Range(0.0f, 3.0f) > 2.5f && _as.isPlaying == false)
         {
             _as.clip = Clips[Random.Range(0, Clips.Length - 1)];

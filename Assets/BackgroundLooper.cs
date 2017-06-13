@@ -106,6 +106,9 @@ public class BackgroundLooper : MonoBehaviour
                     max_x = sr.bounds.max.x;
             }
 
+            var blf = GameObject.Find("BackgroundLooperFarthest");
+            Destroy(blf.transform.GetChild(blf.transform.childCount - 1).gameObject);
+
             var size = max_x - min_x;
             var x = _current_front.transform.position.x - _current_front.GetComponent<SpriteRenderer>().bounds.size.x / 2 - size / 2;
             var pos = new Vector2(x, 0.96f);

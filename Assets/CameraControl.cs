@@ -40,6 +40,7 @@ public class CameraControl : MonoBehaviour
             return;
 
         UpdateMetabodiesByXCoord();
+        _follow_index = Mathf.Clamp(_follow_index, 0, MetabodiesByXCoord.Count - 1);
         _following = MetabodiesByXCoord[_follow_index][0];
         _wanted_x = _following.transform.position.x;
 

@@ -63,6 +63,7 @@ public class BodyPartSelector : MonoBehaviour
                             var mpb = new Vector3(mp.x, mp.y, ren.transform.position.z);
                             if (ren.bounds.Contains(mpb))
                             {
+                                GameObject.Find("Clicker").GetComponent<AudioSource>().Play();
                                 var d = CreateDraggedObject(a);
                                 _status = Status.Dragging;
                                 _dragged_object = d;
@@ -89,7 +90,7 @@ public class BodyPartSelector : MonoBehaviour
 
                             foreach (var di in _dragged_object.Items)
                             {
-                                if ((tpap.transform.position - toap.transform.position).magnitude < 0.5f)
+                                if ((tpap.transform.position - toap.transform.position).magnitude < 0.8f)
                                 {
                                     var obj1 = tpap.transform.parent;
                                     var obj2 = toap.transform.parent;
@@ -144,6 +145,7 @@ public class BodyPartSelector : MonoBehaviour
                                     if (attacher_bpc)
                                         attacher_bpc.ForceMultiplier = 2.9f;
 
+                                    GameObject.Find("Clicker").GetComponent<AudioSource>().Play();
                                     CreateOrMergeMetabodies(attacher_info, attach_to_info);
                                     Done();
                                     attacher_ap.gameObject.tag = "Untagged";
@@ -164,6 +166,11 @@ public class BodyPartSelector : MonoBehaviour
     {
         var metabody = part1.MetaBody;
         var old_metabody = part2.MetaBody;
+
+        if (metabody == old_metabody)
+        {
+            return;
+        }
 
         foreach (var part in old_metabody)
         {
