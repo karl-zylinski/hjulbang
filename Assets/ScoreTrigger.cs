@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 
 public class ScoreTrigger : MonoBehaviour
 {
     private bool _started;
+    private float _started_at;
 
     void Start()
     {
@@ -13,9 +16,11 @@ public class ScoreTrigger : MonoBehaviour
 
     void Update()
     {
-
+        if (_started && Time.time > _started_at + 2.0f && (Input.GetKeyDown(KeyCode.Return)))
+        {
+            SceneManager.LoadScene("Start");
+        }
     }
-
 
     void OnTriggerEnter2D(Collider2D other)
     {
@@ -40,5 +45,6 @@ public class ScoreTrigger : MonoBehaviour
         var tm = gameObject.GetComponentInChildren<TextMesh>();
         tm.text = "Darwin thinks you're worth " + metabody.Count.ToString() + " points";
         _started = true;
+        _started_at = Time.time;
     }
 }

@@ -17,7 +17,6 @@ public class PlantCollider : MonoBehaviour
     public void SetUsed()
     {
         Destroy(GetComponent<Collider2D>());
-        Destroy(transform.GetChild(0).gameObject);
     }
 
     private bool CanConnectAttachpoints(GameObject obj)
@@ -45,6 +44,9 @@ public class PlantCollider : MonoBehaviour
 
         if (attach_points_for_obj.Count == 0)
             return;
+
+        var halo = transform.Find("Halo").GetComponent<HaloAnimator>();
+        halo.EnterGoingToBody(other.gameObject);
 
         var bps = Resources.Load("BodyPartSelector") as GameObject;
         var go = Instantiate(bps);

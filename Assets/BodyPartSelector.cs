@@ -147,9 +147,22 @@ public class BodyPartSelector : MonoBehaviour
 
                                     GameObject.Find("Clicker").GetComponent<AudioSource>().Play();
                                     CreateOrMergeMetabodies(attacher_info, attach_to_info);
-                                    Done();
+
+                                    // Clean up
+                                    SetAttachpointVisible(false);
+                                    Cursor.visible = false;
+                                    Time.timeScale = 1;
+                                    _plant.GetComponent<PlantCollider>().SetUsed();
                                     attacher_ap.gameObject.tag = "Untagged";
                                     attach_to_ap.gameObject.tag = "Untagged";
+
+                                    // Win condition
+                                    var all_attachpoints_in_new_metabody = FindAllAttachPoints(_dragged_object.AttachPoint.transform.parent.gameObject);
+                                    if (all_attachpoints_in_new_metabody.Count == 0)
+                                        GameData.Victory = true;
+
+                                    _status = Status.Done;
+                                    Destroy(gameObject);
                                     return;
                                 }
                             }
@@ -182,18 +195,7 @@ public class BodyPartSelector : MonoBehaviour
         part2.MetaBody = metabody;
         old_metabody.Clear();
     }
-
-    void Done()
-    {
-        _status = Status.Done;
-        SetAttachpointVisible(false);
-        Cursor.visible = false;
-        Time.timeScale = 1;
-        _plant.GetComponent<PlantCollider>().SetUsed();
-
-        Destroy(gameObject);
-    }
-
+    
     private DraggedObject CreateDraggedObject(GameObject attachpoint)
     {
         var part = attachpoint.transform.parent.gameObject;

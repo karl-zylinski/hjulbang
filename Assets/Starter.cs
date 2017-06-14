@@ -14,5 +14,8 @@ public class Starter : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return))
             SceneManager.LoadScene("World");
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Application.Quit();
     }
 }

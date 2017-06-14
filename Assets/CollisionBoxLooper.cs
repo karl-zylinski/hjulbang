@@ -57,8 +57,8 @@ public class CollisionBoxLooper : MonoBehaviour
         while (true)
         {
             var cfb = _current_front.GetComponent<BoxCollider2D>().bounds;
-            var dist = cfb.min.x - (front_body.transform.position.x - Camera.main.orthographicSize * Camera.main.aspect);
-            if (Mathf.Abs(dist) < 1)
+            var dist = (front_body.transform.position.x - Camera.main.orthographicSize * Camera.main.aspect) - cfb.min.x;
+            if (dist < 1)
             {
                 CreateNewFront();
             }

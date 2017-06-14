@@ -71,25 +71,10 @@ public class BackgroundLooper : MonoBehaviour
 
         var attachpoints = GameObject.FindGameObjectsWithTag("AttachPoint");
 
-        if (attachpoints.Length < 2)
+        if (GameData.Victory == true)
         {
             if (LastScreen == null)
                 return;
-
-            /*for (int i = 0; i < 2; ++i)
-            {
-                var pos_x = _current_front.transform.position.x - _current_front.GetComponent<SpriteRenderer>().bounds.size.x / 2 - PureGround.bounds.size.x / 2;
-                var new_pos = new Vector2(pos_x, -3.0f);
-                var bg = new GameObject("bg");
-                var sr = bg.AddComponent<SpriteRenderer>();
-                bg.transform.parent = transform;
-                sr.sprite = PureGround;
-                sr.sortingOrder = -4;
-                bg.transform.position = new_pos;
-                ++_num_spawned;
-                _current_front = bg;
-                GameObject.Find("CollisionBoxLooper").GetComponent<CollisionBoxLooper>().CreateNewFront();
-            }*/
 
             var obj = Instantiate(LastScreen);
             var srs = obj.GetComponentsInChildren<SpriteRenderer>();
@@ -111,7 +96,7 @@ public class BackgroundLooper : MonoBehaviour
 
             var size = max_x - min_x;
             var x = _current_front.transform.position.x - _current_front.GetComponent<SpriteRenderer>().bounds.size.x / 2 - size / 2;
-            var pos = new Vector2(x, 0.96f);
+            var pos = new Vector2(x, 0.95f);
             obj.transform.position = pos;
             GameObject.Find("CollisionBoxLooper").GetComponent<CollisionBoxLooper>().Done = true;
             var bls = FindObjectsOfType<BackgroundLooper>();
@@ -133,8 +118,8 @@ public class BackgroundLooper : MonoBehaviour
         while (true)
         {
             var cfb = _current_front.GetComponent<SpriteRenderer>().bounds;
-            var dist = cfb.min.x - (front_body.transform.position.x - Camera.main.orthographicSize * Camera.main.aspect);
-            if (Mathf.Abs(dist) < 1)
+            var dist = (front_body.transform.position.x - Camera.main.orthographicSize * Camera.main.aspect) - cfb.min.x;
+            if (dist < 1)
             {
                 CreateNewFront(GetNewBackground());
             }
