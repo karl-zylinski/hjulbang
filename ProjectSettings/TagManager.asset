@@ -10,6 +10,8 @@ TagManager:
   - PlantSpawner
   - EndScreen
   - Music
+  - Plant
+  - Stairs
   layers:
   - Default
   - TransparentFX

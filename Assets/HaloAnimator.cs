@@ -55,7 +55,7 @@ public class HaloAnimator : MonoBehaviour
             var start = new Vector2(Random.Range(bc.bounds.min.x, bc.bounds.max.x),
                                      Random.Range(bc.bounds.min.y, bc.bounds.max.y));
             go.transform.position = start;
-            _velocities[i] = (_targets[i] - start) * Random.Range(0, 0.5f);
+            _velocities[i] = (_targets[i] - start) * Random.Range(0, 1.0f);
             _initial_distance[i] = (_targets[i] - start).magnitude;
             _dist_traveled[i] = 0;
         }
@@ -78,6 +78,23 @@ public class HaloAnimator : MonoBehaviour
 
     void Update()
     {
+        var parent_sr = transform.parent.gameObject.GetComponent<SpriteRenderer>();
+
+        if (CurrentHaloState == HaloState.Normal)
+        {
+            var camera = Camera.main;
+
+            float aspect = Screen.width / Screen.height;
+            Vector2 cp = camera.transform.position;
+            float height = camera.orthographicSize * 4.0f;
+            Bounds bounds = new Bounds(
+                cp,
+                new Vector3(height * aspect, height, 0));
+
+            if (!bounds.Intersects(parent_sr.bounds))
+                return;
+        }
+
         if (CurrentHaloState == HaloState.GoingUp)
         {
             _fly_up_cooldown -= Time.deltaTime;
@@ -92,6 +109,12 @@ public class HaloAnimator : MonoBehaviour
                 ns.y = 0;
 
             glow.transform.localScale = ns;
+            var gsr = glow.GetComponent<SpriteRenderer>();
+            var c = gsr.color;
+            c.a -= Time.deltaTime;
+            if (c.a < 0)
+                c.a = 0;
+            gsr.color = c;
 
             if (_fly_up_cooldown <= 0)
             {
@@ -99,7 +122,6 @@ public class HaloAnimator : MonoBehaviour
             }
         }
 
-        var parent_sr = transform.parent.gameObject.GetComponent<SpriteRenderer>();
         var bc = GetComponent<BoxCollider2D>();
         var bcb_min = bc.bounds.min;
         var bcb_max = bc.bounds.max;
@@ -127,7 +149,6 @@ public class HaloAnimator : MonoBehaviour
             var diff = _velocities[i] * Time.deltaTime;
             _dist_traveled[i] += diff.magnitude;
             s.transform.position = p + diff;
-            Debug.DrawLine(s.transform.position, _targets[i]);
 
             if (CurrentHaloState == HaloState.Normal && _dist_traveled[i] >= _initial_distance[i])
             {
@@ -140,7 +161,7 @@ public class HaloAnimator : MonoBehaviour
                     || Mathf.Abs(bcb_max.x - start.x) < 0.4
                     || Mathf.Abs(bcb_max.y - start.y) < 0.4)
                 {
-                    sr.sortingOrder = sr.sortingOrder == 4 ? 6 : 4;
+                    sr.sortingOrder = sr.sortingOrder == 1 ? 3 : 1;
                 }
 
                 _dist_traveled[i] = 0;

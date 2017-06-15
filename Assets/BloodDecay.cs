@@ -8,14 +8,14 @@ public class BloodDecay : MonoBehaviour
 
     void Start()
     {
-        _remove_cooldown = Random.Range(30.0f, 60.0f);
+        _remove_cooldown = Random.Range(20.0f, 40.0f);
     }
 
     void Update()
     {
         _remove_cooldown -= Time.deltaTime;
 
-        if (_remove_cooldown < 0)
+        if (_remove_cooldown <= 0)
             Destroy(gameObject);
     }
 }

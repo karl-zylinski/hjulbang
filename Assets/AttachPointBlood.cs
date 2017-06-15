@@ -18,10 +18,19 @@ public class AttachPointBlood : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.tag == "Ground" && Random.Range(0.0f, 1.0f) > 0.5f)
+        if (other.gameObject.tag == "Ground" || other.gameObject.tag == "Stairs")
         {
             Vector2 pos = transform.position;
-            pos.y = pos.y - 0.5f;
+
+            if (other.gameObject.tag == "Stairs")
+            {
+                pos.y = pos.y - 0.55f;
+            }
+            else
+            {
+                pos.y = pos.y - Random.Range(0.45f, 0.55f);
+            }
+
             var blood = new GameObject("blood");
             blood.AddComponent<BloodDecay>();
             var sr = blood.AddComponent<SpriteRenderer>();

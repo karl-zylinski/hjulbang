@@ -42,5 +42,6 @@ public class StairsMusicTrigger : MonoBehaviour
 
         _started = true;
         GetComponent<AudioSource>().Play();
+        Camera.main.GetComponent<CameraControl>().Focus(other.gameObject);
     }
 }

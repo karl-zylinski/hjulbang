@@ -33,6 +33,13 @@ public class EndTrigger : MonoBehaviour
             p.transform.position = end_screen_start.transform.position + (p.transform.position - origin);
         }
 
+        var all_plants = GameObject.FindGameObjectsWithTag("Plant");
+
+        foreach (var p in all_plants)
+        {
+            Destroy(p);
+        }
+
         Camera.main.transform.position = new Vector3(end_screen.transform.position.x, end_screen.transform.position.y, -10);
         _used = true;
     }
