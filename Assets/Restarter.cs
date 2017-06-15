@@ -8,6 +8,9 @@ public class Restarter : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
+        {
+            GameData.Reset();
             SceneManager.LoadScene("World");
+        }
     }
 }
