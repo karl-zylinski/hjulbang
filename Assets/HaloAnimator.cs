@@ -55,9 +55,9 @@ public class HaloAnimator : MonoBehaviour
             var start = new Vector2(Random.Range(bc.bounds.min.x, bc.bounds.max.x),
                                      Random.Range(bc.bounds.min.y, bc.bounds.max.y));
             go.transform.position = start;
-            _velocities[i] = (_targets[i] - start) * Random.Range(0, 1.0f);
-            _initial_distance[i] = (_targets[i] - start).magnitude;
+            _velocities[i] = new Vector2(Random.Range(-1.5f, 1.5f), Random.Range(-1.5f, 1.5f));
             _dist_traveled[i] = 0;
+            _initial_distance[i] = (_targets[i] - start).magnitude;
         }
     }
 
@@ -134,7 +134,7 @@ public class HaloAnimator : MonoBehaviour
             if (CurrentHaloState == HaloState.Normal)
             {
                 _velocities[i] -= _velocities[i] * 0.99f * Time.deltaTime;
-                _velocities[i] += (_targets[i] - p) * Time.deltaTime;
+                _velocities[i] += (_targets[i] - p).normalized * Time.deltaTime;
             }
             else if (CurrentHaloState == HaloState.GoingUp)
             {
@@ -146,7 +146,7 @@ public class HaloAnimator : MonoBehaviour
                 _velocities[i] = (t2 - p).normalized * 14.0f;
             }
 
-            var diff = _velocities[i] * Time.deltaTime;
+            var diff = _velocities[i] * (CurrentHaloState == HaloState.Normal ? 0.3f : 1.0f) * Time.deltaTime;
             _dist_traveled[i] += diff.magnitude;
             s.transform.position = p + diff;
 
